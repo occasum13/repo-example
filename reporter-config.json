@@ -1,0 +1,14 @@
+{
+    "reporterEnabled": "mochawesome",
+    "mochawesomeReporterOptions": {
+		"charts": true,
+		"reportPageTitle": "custom-title",
+		"embeddedScreenshots": false,
+		"inlineAssets": true,
+		"saveAllAttempts": false,
+		"debug": true,
+		"overwrite": false,
+		"html": false,
+		"json": true
+    }
+  }

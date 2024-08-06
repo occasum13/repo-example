@@ -1,0 +1,75 @@
+steps:
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    id: Generate Access Token
+    entrypoint: sh
+    args:
+      - '-c'
+      - >
+        gcloud auth print-access-token --impersonate-service-account
+        your-gservice-account-link-here >
+        /workspace/access_token
+
+  - name: gcr.io/cloud-builders/yarn
+    id: proxy-install
+    entrypoint: bash
+    args:
+      - "-c"
+      - "wget https://storage.googleapis.com/cloudsql-proxy/v1.20.1/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy && chmod +x cloud_sql_proxy"
+  
+  - name: cypress/base
+    id: Run tests
+    entrypoint: bash
+    args:
+      - "-c"
+      - |
+        npm install
+        (./cloud_sql_proxy -token=$(cat /workspace/access_token) -dir=/cloudsql -instances=your-instance-here=tcp:5432 & sleep 5) && npm run cypress-test-example
+    env:
+      - "DB_USER=${_DB_USER}"
+      - "DB_PASSWORD=${_DB_PASSWORD}"
+      - "DB_HOST=${_DB_HOST}"
+      - "DB_DATABASE=${_DB_DATABASE}"
+    allow_failure: true
+
+  - name: gcr.io/cloud-builders/npm
+    id: Generate Mochawesome Report
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        npm run merge-reports
+        npm run generate-html
+        npm run screenshotPage-generator
+
+  - name: google/cloud-sdk
+    id: Upload Mochawesome html report to Bucket
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        current_date_time=$(date '+%Y-%m-%d/%H-%M-%S')
+        echo "$current_date_time" >> /workspace/current_date_time
+        gsutil -m cp -r /workspace/mochawesome-report/* gs://bucket-main-folder-name/relatorio-qa/repo-name/$current_date_time/mochawesome-report/
+        gsutil -m cp -r /workspace/output/screenshotsPage.html gs://bucket-main-folder-name/relatorio-qa/repo-name/$current_date_time/mochawesome-report/
+
+  - name: gcr.io/cloud-builders/npm
+    id: Notify slack
+    entrypoint: bash
+    args:
+      - "-c"
+      - |
+        export DATE_TIME=$(cat /workspace/current_date_time)
+        npm run slack-notify
+    env:
+      - 'HTML_PATH=${_HTML_PATH}'
+      - 'GCS_BUCKET=${_GCS_BUCKET}'
+      - 'REPORT_FOLDER=${_REPORT_FOLDER}'
+      - 'WEBHOOK=${_WEBHOOK}'
+      - 'PROJECT_ID=${PROJECT_ID}'
+      - 'BUILD_ID=${BUILD_ID}'
+      - 'REPO_NAME=${REPO_NAME}'
+      - 'BRANCH_NAME=${BRANCH_NAME}'
+      - 'COMMIT_SHA=${SHORT_SHA}'
+      - 'TRIGGER_NAME=${TRIGGER_NAME}'
+
+timeout: 60000s

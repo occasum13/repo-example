@@ -1,0 +1,25 @@
+.DS_Store
+screenshots/
+videos/
+node_modules/
+log/
+package-lock.json
+cypress-mochawesome-reporter.log
+mochawesome-report/
+mochawesome.json
+reports/
+output/
+screenshotPage.html
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Others
+tmp
+.idea
