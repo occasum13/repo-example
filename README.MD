@@ -6,5 +6,5 @@ This is an example repo to run cypress alongside an integration between Cypress,
 4. check .env-example, copy and create your own .env (don't worry about the envs with local-testing in them, they need to be set up in gcp);
 5. get a slack channel webhook to put it inside .env and properly set the slack channel;
 5. check devops/ci/example/cloudbuild.yaml and set up your instances and bucket folders names;
-6. setup your gcp environment properly;
+6. setup your gcp environment properly (remember to setup the devops/ci path and the variables too, but keep in mind that some of them don't have to be explicit, check gcp variables documentation.);
 7. enjoy your integration :D
