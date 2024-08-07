@@ -4,7 +4,11 @@
   "description": "example repository for cypress+mochawesome+gcp+slack integration",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "cypress-test": "npx cypress run",
+    "slack-notify": "set TRIGGER_NAME=test && node ./cypress/support/lib/slack.js",
+    "merge-reports": "npx mochawesome-merge > mochawesome.json",
+    "generate-html": "npx marge mochawesome.json",
+    "screenshotPage-generator": "node ./cypress/support/lib/generateScreenshotPage.js"
   },
   "author": "João Gayer.",
   "license": "ISC",
